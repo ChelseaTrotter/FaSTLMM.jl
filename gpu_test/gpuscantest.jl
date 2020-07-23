@@ -2,12 +2,14 @@ using DelimitedFiles
 using LinearAlgebra
 using Optim
 using Distributions
+using Random
 
 include("../gpu_src/gpuscan.jl")
 # include("../gpu_src/kinship.jl")
 include("../src/readData.jl")
 include("../src/wls.jl")
 include("../src/lmm.jl")
+include("../src/util.jl")
 
 
 pheno_file = joinpath(@__DIR__, "..", "data", "bxdData", "traits.csv")
@@ -18,16 +20,17 @@ geno = readGenoProb(geno_file)
 # getting kinship matrix from gemma 
 kinship_file = joinpath(@__DIR__, "..", "test","output", "result.cXX.txt")
 k = convert(Array{Float64,2},readdlm(kinship_file, '\t'))
+@info "Data Reading Done."
 
 # CPU scan
 for i in 5#1:size(pheno)[2]
     # run_julia(pheno[:,i], geno, k, false, "alt")
     ## genome scan
-    global (sigma2, h2, lod) = scan(reshape(pheno[:,i], :, 1), geno, k, false, "alt")
+    global (sigma2, h2, lod) = scan(reshape(pheno[:,i], :, 1), geno, k, false, "null")
     ## genome scan permutation
     # scan(reshape(pheno[:,1], :, 1), geno, k, 1024,1,true);
 
-    ## transform LOD to -log10(p) (univariate)
+    # transform LOD to -log10(p) (univariate)
     # result = -log.(10,(ccdf.(Chisq(1),2*log(10)*lod)));
     # result = result[1:2:end]
     # return (result, sigma2, h2)
