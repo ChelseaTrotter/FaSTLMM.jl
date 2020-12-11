@@ -11,6 +11,9 @@ using Statistics
 using Random
 
 
+
+include("util.jl")
+
 # code for (wls) weighted least squares
 include("wls.jl")
 export wls
@@ -25,6 +28,7 @@ export rotateData, flmm
 include("scan.jl")
 export scan
 
-include("util.jl")
 
+include("bulkscan.jl")
+export bulkscan
 end # module

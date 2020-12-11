@@ -3,6 +3,7 @@ using LinearAlgebra
 using Optim
 using Distributions
 using Random
+using CuArrays
 
 include("../gpu_src/gpuscan.jl")
 # include("../gpu_src/kinship.jl")
@@ -22,6 +23,7 @@ kinship_file = joinpath(@__DIR__, "..", "test","output", "result.cXX.txt")
 k = convert(Array{Float64,2},readdlm(kinship_file, '\t'))
 @info "Data Reading Done."
 
+d_pheno = CuArrays
 # CPU scan
 for i in 5#1:size(pheno)[2]
     # run_julia(pheno[:,i], geno, k, false, "alt")
