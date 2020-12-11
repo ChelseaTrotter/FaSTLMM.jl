@@ -16,20 +16,22 @@ using LinearAlgebra
 # K = readtable("../data/kinship.csv");
 # K = K[2:size(K,2)];
 # K = DataArray(K);
-
-K = readdlm("../data/kinship.csv", ','; skipstart=1)[:, 2:end]
+kinshipfile = joinpath(@__DIR__, "..", "data", "kinship.csv")
+K = readdlm(kinshipfile, ','; skipstart=1)[:, 2:end]
 
 # pheno = readtable("../data/pheno.csv");
 # pheno = pheno[2:size(pheno,2)];
 # pheno = DataArray(pheno);
 
-pheno = readdlm("../data/pheno.csv", ','; skipstart=1)[:, 2:end]
+phenofile = joinpath(@__DIR__, "..", "data", "pheno.csv")
+pheno = readdlm(phenofile, ','; skipstart=1)[:, 2:end]
 
 # covar = readtable("../data/covar.csv");
 # covar = covar[2:size(covar,2)];
 # covar = DataArray(covar);
 
-covar = readdlm("../data/covar.csv", ','; skipstart=1)[:, 2:end]
+covarfile = joinpath(@__DIR__, "..", "data", "covar.csv")
+covar = readdlm(covarfile, ','; skipstart=1)[:, 2:end]
 
 X = convert(Array{Float64,2},covar);
 K = convert(Array{Float64,2},K);
@@ -39,10 +41,11 @@ res = Array{Float64}(undef, size(pheno,2)*2,size(covar,2)+4)
 
 # loop through the phenotypes
 for i = 1:size(pheno,2)
+    println("Loop $i")
     # replace all "NA" with missing type
     for j = 1:size(pheno,1)
         if pheno[j,i] == "NA" 
-            # print("=========replacing============= ")
+            print("=========replacing============= ")
             pheno[j,i] = missing
         end
     end
@@ -52,7 +55,7 @@ for i = 1:size(pheno,2)
     y = Array{Float64}(undef, sum(whichKeep),1)
     y[:,1] = convert(Array{Float64,1},pheno[whichKeep,i]);
     # perform rotation
-    (yy,XX,lambda) = rotateData(y,X[whichKeep,:],
+    @time (yy,XX,lambda) = rotateData(y,X[whichKeep,:],
                                 K[whichKeep,whichKeep])
     out0 = flmm(yy,XX,lambda,false)
     out1 = flmm(yy,XX,lambda,true)    
@@ -65,12 +68,15 @@ end
 # names!(resDF,convert(Array{Symbol},cnames));
 # writetable("julia_results.csv",resDF);
 cnames =["b0" "b1" "sigma2" "h2" "loglik" "reml"];
-writedlm("julia_results.csv", [cnames; res], ",")
+
+juliaresultfile = joinpath(@__DIR__, "..", "data", "julia_results.csv")
+writedlm(juliaresultfile, [cnames; res], ",")
 
 
 # pylmm = readtable("../data/pylmm_results.csv");
 # index,method,hsq,intercept,sex,sigmasq,loglik
-pylmm = readdlm("../data/pylmm_results.csv" , ','; skipstart=1)[:, 1:end]
+pylmmresultfile = joinpath(@__DIR__, "..", "data", "pylmm_results.csv")
+pylmm = readdlm(pylmmresultfile , ','; skipstart=1)[:, 1:end]
 # display(pylmm)
 # display(res)
 
